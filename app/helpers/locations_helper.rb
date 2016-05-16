@@ -12,7 +12,7 @@ module LocationsHelper
 
 		difference_of_longitudes = user_long - bus_long.to_f
 
-		distance + Math.sqrt(difference_of_latitudes ** 2 + difference_of_longitudes ** 2)
+		distance = Math.sqrt(difference_of_latitudes ** 2 + difference_of_longitudes ** 2)
 		
 		distance <= max_distance
 
