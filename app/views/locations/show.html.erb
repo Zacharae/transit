@@ -1,3 +1,5 @@
+
+
 <p id="notice"><%= notice %></p>
 
 <h1>Choose your bus!</h1>
@@ -6,6 +8,69 @@
 <p class="text-muted">
 	<%= @location.full_street_address %> <%= link_to fa_icon('pencil', text: 'Edit'), edit_location_path(@location) %>
 </p>
+
+<div id="map" style="height:500px;width:500px;margin:0;padding:0;"></div>
+<script>
+var map, mapOptions;
+     function initMap() {
+       var userLatLng = {
+         lat: <%= @location.latitude %>,
+         lng: <%= @location.longitude %>
+       };
+
+       var nearbyBuses = <%= raw @buses.to_json %>;
+      // var busIcon <%= image_path 'bus.png' %>;
+     //  var guyIcon <% image_path 'guy.png' %>;
+       mapOptions = {
+         center: userLatLng,
+         zoom: 14
+       };
+
+       map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+       var userMarker = new google.maps.Marker({
+         position: userLatLng,
+         map: map,
+         animation: google.maps.Animation.DROP,
+         title: "You are here."
+       });
+
+       var userInfo = '<div id="content">' + '<h3>' + '<%= @location.full_street_address %>' + '</h3>' + '</div>';
+       var userWindow = new google.maps.InfoWindow({
+        content: userInfo
+       });
+
+       nearbyBuses.forEach(function (element){
+        var busLatLng = new google.maps.LatLng(element['LATITUDE'], element['LONGITUDE']);
+
+        var busMarker = new google.maps.Marker({
+          position: busLatLng,
+          map: map,
+         // icon: busIcon,
+          animation: google.maps.Animation.DROP,
+          title: element['ROUTE']
+        });
+
+ var busInfo =
+  '<div id=content>' + '<h3>Bus ' + element['ROUTE'] + ' ' + element['DIRECTION'] + '</h3>' + '<div id="bodyContent">' + '<p>Next Stop:' + element['TIMEPOINT'] + '</p>' + '</div>' + '</div>' ;
+
+  var busWindow = new google.maps.InfoWindow({
+    content: busInfo
+  });
+
+  google.maps.event.addListener(busMarker, 'mouseover', function(){
+    busWindow.open(map, busMarker);
+  });
+  google.maps.event.addListener(userMarker, 'mouseover', function(){
+    userWindow.open(map, userMarker);
+  });
+
+       });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['google_maps_api_key'] %>&callback=initMap"
+   async defer></script>
+
 
 <h3>The closest buses to you</h3>
 
@@ -46,3 +111,4 @@
 
 <%= link_to 'Edit', edit_location_path(@location) %> |
 <%= link_to 'Back', locations_path %>
+
